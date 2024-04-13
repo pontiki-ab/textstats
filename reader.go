@@ -19,8 +19,8 @@ type Results struct {
 	Syllables      int
 	DifficultWords int
 
-	syllableProperNouns map[int]int
-	syllableWords       map[int]int
+	WordCountPerSyllableCountIncludingProperNouns map[int]int
+	WordCountPerSyllableCountExcludingProperNouns map[int]int
 }
 
 // AverageLettersPerWord returns the average number of letters per word in the
@@ -48,14 +48,14 @@ func (r *Results) AverageWordsPerSentence() float64 {
 // syllables, including or excluding proper nouns, in the text
 func (r *Results) WordsWithAtLeastNSyllables(n int, incProperNouns bool) int {
 	var total int
-	for sCount, wCount := range r.syllableWords {
+	for sCount, wCount := range r.WordCountPerSyllableCountExcludingProperNouns {
 		if sCount >= n {
 			total += wCount
 		}
 	}
 
 	if !incProperNouns {
-		for sCount, wCount := range r.syllableProperNouns {
+		for sCount, wCount := range r.WordCountPerSyllableCountIncludingProperNouns {
 			if sCount >= n {
 				total -= wCount
 			}
@@ -185,17 +185,17 @@ func analyseWord(word string, res *Results) {
 	sCount := syllableCount(word)
 	res.Syllables += sCount
 
-	if _, ok := res.syllableWords[sCount]; ok {
-		res.syllableWords[sCount]++
+	if _, ok := res.WordCountPerSyllableCountExcludingProperNouns[sCount]; ok {
+		res.WordCountPerSyllableCountExcludingProperNouns[sCount]++
 	} else {
-		res.syllableWords[sCount] = 1
+		res.WordCountPerSyllableCountExcludingProperNouns[sCount] = 1
 	}
 
 	if l, _ := utf8.DecodeRuneInString(word); unicode.IsUpper(l) {
-		if _, ok := res.syllableProperNouns[sCount]; ok {
-			res.syllableProperNouns[sCount]++
+		if _, ok := res.WordCountPerSyllableCountIncludingProperNouns[sCount]; ok {
+			res.WordCountPerSyllableCountIncludingProperNouns[sCount]++
 		} else {
-			res.syllableProperNouns[sCount] = 1
+			res.WordCountPerSyllableCountIncludingProperNouns[sCount] = 1
 		}
 	}
 
@@ -216,8 +216,8 @@ func Analyse(r io.Reader) (res *Results, err error) {
 	scanner := bufio.NewScanner(r)
 	scanner.Split(bufio.ScanRunes)
 	res = &Results{}
-	res.syllableWords = make(map[int]int)
-	res.syllableProperNouns = make(map[int]int)
+	res.WordCountPerSyllableCountExcludingProperNouns = make(map[int]int)
+	res.WordCountPerSyllableCountIncludingProperNouns = make(map[int]int)
 
 	var word string
 	var endWord bool
