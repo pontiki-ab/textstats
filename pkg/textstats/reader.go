@@ -207,11 +207,11 @@ func analyseWord(word string, res *Results) {
 	mapKey := fmt.Sprintf("%d-%d", defaultAlgoSyllableCount, alternativeAlgoSyllableCount)
 
 	var cmuSyllableCountPtr *int
-	if cmuSyllableCount, ok := constants.CMUDictSyllableCountPerWord[word]; ok {
+	if cmuSyllableCount, ok := constants.CMUDictSyllableCountPerWord[strings.ToUpper(word)]; ok {
 		cmuSyllableCountPtr = &cmuSyllableCount
 	}
 
-	var mostLikelySyllableCount int
+	var mostLikelySyllableCount = alternativeAlgoSyllableCount
 	switch {
 	case cmuSyllableCountPtr != nil: // CMU syllable count is most likely the correct one
 		mostLikelySyllableCount = *cmuSyllableCountPtr
