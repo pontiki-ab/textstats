@@ -269,8 +269,9 @@ func Analyse(r io.Reader) (res *Results, err error) {
 	scanner := bufio.NewScanner(r)
 	scanner.Split(bufio.ScanRunes)
 	res = &Results{
-		WordList:                  map[string]*Word{},
-		WordCountPerSyllableCount: map[int]int{},
+		WordList:                        map[string]*Word{},
+		WordCountPerSyllableCount:       map[int]int{},
+		UniqueWordCountPerSyllableCount: map[int]int{},
 	}
 
 	var word string
