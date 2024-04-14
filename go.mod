@@ -1,4 +1,4 @@
-module textstats
+module github.com/pontiki-ab/textstats
 
 go 1.22
 
