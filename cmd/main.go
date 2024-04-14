@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	termutil "github.com/andrew-d/go-termutil"
-	"github.com/darkliquid/textstats"
+	"github.com/andrew-d/go-termutil"
+	"textstats/pkg/textstats"
 )
 
 func printStats(name string, res *textstats.Results) {

@@ -7,6 +7,8 @@ import (
 	"strings"
 	"unicode"
 	"unicode/utf8"
+
+	"github.com/mtso/syllables"
 )
 
 // Results is a struct containing the results of an analysis
@@ -179,10 +181,14 @@ func syllableCount(word string) (sCount int) {
 	return
 }
 
+func syllableCountAlternative(word string) (sCount int) {
+	return syllables.In(word)
+}
+
 func analyseWord(word string, res *Results) {
 	res.Words++
 
-	sCount := syllableCount(word)
+	sCount := syllableCountAlternative(word)
 	res.Syllables += sCount
 
 	if _, ok := res.WordCountPerSyllableCountExcludingProperNouns[sCount]; ok {
