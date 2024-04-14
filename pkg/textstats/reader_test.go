@@ -77,7 +77,7 @@ func (s *AnalyseSuite) TestPercentageWordsWithAtLeastNSyllables() {
 
 func (s *AnalyseSuite) TestWordCount() {
 	res, _ := Analyse(strings.NewReader(qbf))
-	s.Equal(9, res.Words)
+	s.Equal(9, res.CountTotalWords)
 }
 
 func (s *AnalyseSuite) TestLetterCount() {

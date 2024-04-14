@@ -33,37 +33,39 @@ type Word struct {
 
 // Results is a struct containing the results of an analysis
 type Results struct {
-	Words          int
-	Sentences      int
-	Letters        int
-	Punctuation    int
-	Spaces         int
-	Syllables      int
-	DifficultWords int
+	CountTotalWords  int
+	CountUniqueWords int
+	Sentences        int
+	Letters          int
+	Punctuation      int
+	Spaces           int
+	Syllables        int
+	DifficultWords   int
 
-	WordCountPerSyllableCount map[int]int
-	WordList                  map[string]*Word
+	WordCountPerSyllableCount       map[int]int
+	UniqueWordCountPerSyllableCount map[int]int
+	WordList                        map[string]*Word
 }
 
 // AverageLettersPerWord returns the average number of letters per word in the
 // text
 func (r *Results) AverageLettersPerWord() float64 {
-	return float64(r.Letters) / float64(r.Words)
+	return float64(r.Letters) / float64(r.CountTotalWords)
 }
 
 // AverageSyllablesPerWord returns the average number of syllables per word in
 // the text
 func (r *Results) AverageSyllablesPerWord() float64 {
-	return float64(r.Syllables) / float64(r.Words)
+	return float64(r.Syllables) / float64(r.CountTotalWords)
 }
 
 // AverageWordsPerSentence returns the avergae number of words per sentence in
 // the text
 func (r *Results) AverageWordsPerSentence() float64 {
 	if r.Sentences == 0 {
-		return float64(r.Words)
+		return float64(r.CountTotalWords)
 	}
-	return float64(r.Words) / float64(r.Sentences)
+	return float64(r.CountTotalWords) / float64(r.Sentences)
 }
 
 // WordsWithAtLeastNSyllables returns the number of words with at least N
@@ -86,7 +88,7 @@ func (r *Results) WordsWithAtLeastNSyllables(n int) int {
 // PercentageWordsWithAtLeastNSyllables returns the percentage of words with at
 // least N syllables, including or excluding proper nouns, in the text
 func (r *Results) PercentageWordsWithAtLeastNSyllables(n int) float64 {
-	return (float64(r.WordsWithAtLeastNSyllables(n)) / float64(r.Words)) * 100.0
+	return (float64(r.WordsWithAtLeastNSyllables(n)) / float64(r.CountTotalWords)) * 100.0
 }
 
 // FleschKincaidReadingEase returns the Flesch-Kincaid reading ease score for
@@ -112,7 +114,7 @@ func (r *Results) ColemanLiauIndex() float64 {
 		sentences = 1
 	}
 
-	return (5.89 * (float64(r.Letters) / float64(r.Words))) - (0.3 * (sentences / float64(r.Words))) - 15.8
+	return (5.89 * (float64(r.Letters) / float64(r.CountTotalWords))) - (0.3 * (sentences / float64(r.CountTotalWords))) - 15.8
 }
 
 // SMOGIndex returns the SMOG index for the given text
@@ -132,19 +134,19 @@ func (r *Results) AutomatedReadabilityIndex() float64 {
 		sentences = 1
 	}
 
-	return (4.71 * (float64(r.Letters) / float64(r.Words))) + (0.5 * (float64(r.Words) / sentences)) - 21.43
+	return (4.71 * (float64(r.Letters) / float64(r.CountTotalWords))) + (0.5 * (float64(r.CountTotalWords) / sentences)) - 21.43
 }
 
 // DaleChallReadabilityScore returns the Dale-Chall readability score for the given text
 func (r *Results) DaleChallReadabilityScore() float64 {
-	difficultyPercentage := (float64(r.DifficultWords) / float64(r.Words)) * 100
+	difficultyPercentage := (float64(r.DifficultWords) / float64(r.CountTotalWords)) * 100
 
 	sentences := float64(r.Sentences)
 	if sentences == 0 {
 		sentences = 1
 	}
 
-	score := (0.1579 * difficultyPercentage) + (0.0496 * (float64(r.Words) / sentences))
+	score := (0.1579 * difficultyPercentage) + (0.0496 * (float64(r.CountTotalWords) / sentences))
 	if difficultyPercentage > 5 {
 		score += 3.6365
 	}
@@ -198,7 +200,7 @@ func SyllableCountAlternative(word string) (sCount int) {
 }
 
 func analyseWord(word string, res *Results) {
-	res.Words++
+	res.CountTotalWords++
 
 	defaultAlgoSyllableCount := SyllableCount(word)
 	alternativeAlgoSyllableCount := SyllableCountAlternative(word)
@@ -232,6 +234,14 @@ func analyseWord(word string, res *Results) {
 				MostLikelySyllableCount:      mostLikelySyllableCount,
 			},
 		}
+
+		if _, ok := res.UniqueWordCountPerSyllableCount[mostLikelySyllableCount]; ok {
+			res.UniqueWordCountPerSyllableCount[mostLikelySyllableCount]++
+		} else {
+			res.UniqueWordCountPerSyllableCount[mostLikelySyllableCount] = 1
+		}
+
+		res.CountUniqueWords++
 	}
 
 	res.Syllables += mostLikelySyllableCount
